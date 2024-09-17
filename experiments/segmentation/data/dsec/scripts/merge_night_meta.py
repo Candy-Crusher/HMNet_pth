@@ -27,22 +27,24 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-export PYTHONPATH="/home/xiaoshan/work/adap_v/HMNet_pth"
 
-if [ $# -le 0 ];then
-    echo "Usage: $0 [1]"
-    echo "    [1]: config file"
-    exit
-fi
+import numpy as np
+import pickle as pkl
 
-NAME=${1##*/}
-NAME=${NAME%.py}
+from hmnet.utils.common import get_list
 
-ROOT=./data/dsec
-SKIP_TS=200.001
-NUM_CLASSES=11
+def merge(phase):
+    list_fpath = get_list(f'./night_{phase}_meta/', ext='npy')
 
-dir=$(ls -d ./workspace/${NAME}/my_night_result/pred_test/)
-out=${dir}/logs/
-python ./scripts/eval_seg.py ${dir} ./data/dsec/night_test_lbl/ ${out} ${NUM_CLASSES} --pred_type npy_files --gt_type hdf5_files --gt_hdf5_path data
+    dict_meta = {}
+    for fpath in list_fpath:
+        meta = np.load(fpath).astype(np.int64)
+        key = fpath.split('/')[-1].replace('.npy', '')
+        dict_meta[key] = (meta[:,0], meta[:,1])
+        print(fpath)
 
+    pkl.dump(dict_meta, open(f'./night_list/{phase}/meta.pkl', 'wb'))
+
+#merge('val')
+merge('test')
+# merge('train')

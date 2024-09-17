@@ -27,22 +27,37 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-export PYTHONPATH="/home/xiaoshan/work/adap_v/HMNet_pth"
 
-if [ $# -le 0 ];then
-    echo "Usage: $0 [1]"
-    echo "    [1]: config file"
-    exit
-fi
+import numpy as np
+import h5py
+import hdf5plugin
 
-NAME=${1##*/}
-NAME=${NAME%.py}
+from hmnet.utils.common import get_list
 
-ROOT=./data/dsec
-SKIP_TS=200.001
-NUM_CLASSES=11
 
-dir=$(ls -d ./workspace/${NAME}/my_night_result/pred_test/)
-out=${dir}/logs/
-python ./scripts/eval_seg.py ${dir} ./data/dsec/night_test_lbl/ ${out} ${NUM_CLASSES} --pred_type npy_files --gt_type hdf5_files --gt_hdf5_path data
+def save(phase):
+    header = 'name,start,end'
+
+    list_fpath = get_list(f'./night_list/{phase}/events.txt', ext=None)
+    out = ''
+
+    for fpath in list_fpath:
+        print(fpath)
+        data = h5py.File(fpath)
+        t = data['events'][:,0]
+        name = fpath.split('/')[-1]
+        start = t[0]
+        end = t[-1]
+
+        d = t[1:] - t[:-1]
+        assert np.any(d < 0) == False
+
+        out += f'\n{name},{start},{end}'
+
+    with open(f'./night_list/{phase}/video_duration.csv', 'w') as fp:
+        fp.write(header + out)
+        print(out)
+
+# save('train')
+save('test')
 

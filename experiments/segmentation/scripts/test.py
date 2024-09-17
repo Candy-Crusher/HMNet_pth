@@ -120,6 +120,10 @@ def main(config):
     list_fpath_lbl = get_chunk(list_fpath_lbl, chunk_str=config.test_chunks)
 
     for fpath_evt, fpath_rgb, fpath_lbl in zip(list_fpath_evt, list_fpath_rgb, list_fpath_lbl):
+        print(f'\nprocessing {fpath_evt}')
+        # 如果名字里有13 14 则跳过
+        if '13' in fpath_evt or '14' in fpath_evt:
+            continue
         # get dataset
         dataset = config.get_dataset(fpath_evt, fpath_rgb, fpath_lbl, config.fpath_meta, config.fpath_video_duration, config.data_root, fast_mode=config.fast, debug=DEBUG)
         loader = torch.utils.data.DataLoader(dataset,
@@ -171,6 +175,7 @@ def main(config):
         outfile = fpath_evt.split('/')[-1].replace('.hdf5', '.npy')
         fpath_out = f'{config.dpath_out}/{outfile}'
         np.save(fpath_out, output)
+        print(f'wrote {fpath_out}')
 
 def backward_transform(preds, img_metas, transform):
     out_preds = []

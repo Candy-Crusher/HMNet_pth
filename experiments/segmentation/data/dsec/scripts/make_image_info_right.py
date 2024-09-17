@@ -58,14 +58,16 @@ TEST_DIRS = [
 def main(phase):
     if phase == 'train':
         dirs = TRAIN_DIRS
+        timestamp_path = "/home/xiaoshan/work/datasets/DSEC/images/train"
     elif phase == 'test':
         dirs = TEST_DIRS
+        timestamp_path = "/home/xiaoshan/work/datasets/DSEC/images/test"
 
     for dir in dirs:
-        run(dir, phase)
+        run(dir, timestamp_path, phase)
 
 
-def run(dpath_in, phase):
+def run(dpath_in, timestamp_path, phase):
     print(dpath_in, phase)
     list_fpath_image = get_list(f'{phase}_img_right/{dpath_in}_images/', ext='png')
     length = max([ len(fpath) for fpath in list_fpath_image ])
@@ -73,7 +75,7 @@ def run(dpath_in, phase):
     list_fpath_image = np.array(list_fpath_image, dtype=np.dtype(dtype_str))
 
     fpath_evt = f'{phase}_evt/{dpath_in}_events.h5'
-    fpath_time = f'./source/{dpath_in}/images/timestamps.txt'
+    fpath_time = f'{timestamp_path}/{dpath_in}/images/timestamps.txt'
     times = get_times(fpath_time, fpath_evt)
 
     assert len(list_fpath_image) == len(times)

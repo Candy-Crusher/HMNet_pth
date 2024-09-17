@@ -45,23 +45,24 @@ TRAIN_DIRS = [
     'zurich_city_05_a',
     'zurich_city_06_a',
     'zurich_city_07_a',
-    'zurich_city_08_a',
+    'zurich_city_08_a'
 ]
 
 TEST_DIRS = [
     'zurich_city_13_a',
     'zurich_city_14_c',
-    'zurich_city_15_a',
+    'zurich_city_15_a'
 ]
+
 
 
 def main(phase):
     if phase == 'train':
         dirs = TRAIN_DIRS
-        timestamp_path = "/home/xiaoshan/work/datasets/DSEC/images/train"
+        timestamp_path = "/home/xiaoshan/work/adap_v/my_proj/data/DSEC/day/timestamps/train"
     elif phase == 'test':
         dirs = TEST_DIRS
-        timestamp_path = "/home/xiaoshan/work/datasets/DSEC/images/test"
+        timestamp_path = "/home/xiaoshan/work/adap_v/my_proj/data/DSEC/day/timestamps/val"
 
     for dir in dirs:
         run(dir, timestamp_path, phase)
@@ -69,13 +70,13 @@ def main(phase):
 
 def run(dpath_in, timestamp_path, phase):
     print(dpath_in, phase)
-    list_fpath_image = get_list(f'{phase}_img/{dpath_in}_images/', ext='png')
+    list_fpath_image = get_list(f'my_{phase}_img/{dpath_in}_images/', ext='png')
     length = max([ len(fpath) for fpath in list_fpath_image ])
     dtype_str = f'<U{length}'
     list_fpath_image = np.array(list_fpath_image, dtype=np.dtype(dtype_str))
 
-    fpath_evt = f'{phase}_evt/{dpath_in}_events.h5'
-    fpath_time = f'{timestamp_path}/{dpath_in}/images/timestamps.txt'
+    fpath_evt = f'my_{phase}_evt/{dpath_in}_events.h5'
+    fpath_time = f'{timestamp_path}/{dpath_in}/timestamps.txt'
     times = get_times(fpath_time, fpath_evt)
 
     assert len(list_fpath_image) == len(times)
@@ -85,7 +86,7 @@ def run(dpath_in, timestamp_path, phase):
     output['t'] = times
     output['image'] = list_fpath_image
 
-    fpath_out = f'{phase}_img/{dpath_in}_image_info.npy'
+    fpath_out = f'my_{phase}_img/{dpath_in}_image_info.npy'
     np.save(fpath_out, output)
 
     print(times[0], list_fpath_image[0])
@@ -109,7 +110,7 @@ def get_times(fpath_time, fpath_evt):
 
 
 if __name__ == '__main__':
-    main('train')
+    # main('train')
     main('test')
 
 

@@ -27,22 +27,57 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-export PYTHONPATH="/home/xiaoshan/work/adap_v/HMNet_pth"
 
-if [ $# -le 0 ];then
-    echo "Usage: $0 [1]"
-    echo "    [1]: config file"
-    exit
-fi
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('target', type=str, choices=['train', 'test'], help='')
+    parser.add_argument('--split' , type=str, default='1/1', help='')
+    args = parser.parse_args()
 
-NAME=${1##*/}
-NAME=${NAME%.py}
+import numpy as np
+import h5py
+import hdf5plugin
 
-ROOT=./data/dsec
-SKIP_TS=200.001
-NUM_CLASSES=11
+from hmnet.utils.common import get_list, get_chunk, mkdir
 
-dir=$(ls -d ./workspace/${NAME}/my_night_result/pred_test/)
-out=${dir}/logs/
-python ./scripts/eval_seg.py ${dir} ./data/dsec/night_test_lbl/ ${out} ${NUM_CLASSES} --pred_type npy_files --gt_type hdf5_files --gt_hdf5_path data
+def main():
+    dpath_out = args.target + '_evt'
+    dpath_out_pos = 'night_' + args.target + '_meta'
+    mkdir(dpath_out)
+    mkdir(dpath_out_pos)
 
+    list_fpath = get_list(f'./night_list/{args.target}/events.txt', ext=None)
+    print(list_fpath)
+    list_fpath = get_chunk(list_fpath, chunk_str=args.split)
+
+    for fpath in list_fpath:
+        data = h5py.File(fpath)['events']
+
+        t = data[:,0].astype(int)
+        diff = t[1:] - t[:-1]
+        assert diff.min() >= 0
+
+        segment_indices = t // 1000
+        max_seg_idx = segment_indices.max()
+        output = np.zeros([max_seg_idx+1,2])
+
+        seg_idx, pos, count = np.unique(segment_indices, return_index=True, return_counts=True)
+        output[seg_idx] = np.stack([pos, count], axis=1)
+        output[:,0] = pad_index(output[:,0], output[:,1])
+        fpath_out = dpath_out_pos + '/' + fpath.split('/')[-1]
+        np.save(fpath_out, output)
+        print(fpath_out)
+        print('N_seg: ', len(seg_idx))
+
+def pad_index(pos, count):
+    index = 0
+    for i in reversed(range(len(pos))):
+        if count[i] == 0:
+            pos[i] = index
+        else:
+            index = pos[i]
+    return pos
+
+if __name__ == '__main__':
+    main()

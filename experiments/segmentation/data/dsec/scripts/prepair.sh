@@ -27,7 +27,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+export PYTHONPATH=$PYTHONPATH:/home/xiaoshan/work/adap_v/HMNet_pth
 while getopts ah OPT
 do
     case $OPT in
@@ -80,18 +80,18 @@ mkdir -p list
 
 
 for dir in ${TRAIN[@]};do
-    ln -s $(readlink -f ./source/$dir/events/left/events.h5) ./train_evt/${dir}_events.h5
-    ln -s $(readlink -f ./source/$dir/images/left/rectified) ./train_img/${dir}_images
-    ln -s $(readlink -f ./source/train/$dir/11classes) ./train_lbl/${dir}_labels
-    ln -s $(readlink -f ./source/$dir/images/right/rectified) ./train_img_right/${dir}_images
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/events/$dir/events/left/events.h5) ./train_evt/${dir}_events.h5
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/images/train/$dir/images/left/rectified) ./train_img/${dir}_images
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/semantic_segmentation/train/$dir/11classes) ./train_lbl/${dir}_labels
+    ln -s $(readlink -f  /home/xiaoshan/work/datasets/DSEC/images/train/$dir/images/right/rectified) ./train_img_right/${dir}_images
 done
 
 
 for dir in ${TEST[@]};do
-    ln -s $(readlink -f ./source/$dir/events/left/events.h5) ./test_evt/${dir}_events.h5
-    ln -s $(readlink -f ./source/$dir/images/left/rectified) ./test_img/${dir}_images
-    ln -s $(readlink -f ./source/test/$dir/11classes) ./test_lbl/${dir}_labels
-    ln -s $(readlink -f ./source/$dir/images/right/rectified) ./test_img_right/${dir}_images
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/events/$dir/events/left/events.h5) ./test_evt/${dir}_events.h5
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/images/test/$dir/images/left/rectified) ./test_img/${dir}_images
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/semantic_segmentation/test/$dir/11classes) ./test_lbl/${dir}_labels
+    ln -s $(readlink -f /home/xiaoshan/work/datasets/DSEC/images/test/$dir/images/right/rectified) ./test_img_right/${dir}_images
 done
 
 python ./scripts/make_image_info.py

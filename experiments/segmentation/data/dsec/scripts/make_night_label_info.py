@@ -38,54 +38,56 @@ from hmnet.utils.common import get_list
 
 
 TRAIN_DIRS = [
-    'zurich_city_00_a',
-    'zurich_city_01_a',
-    'zurich_city_02_a',
-    'zurich_city_04_a',
-    'zurich_city_05_a',
-    'zurich_city_06_a',
-    'zurich_city_07_a',
-    'zurich_city_08_a',
+    'zurich_city_03_a',
+    'zurich_city_09_a',
+    'zurich_city_09_b',
+    'zurich_city_09_c',
+    'zurich_city_09_d',
+    'zurich_city_09_e',
+    'zurich_city_10_a',
+    'zurich_city_10_b'
 ]
 
 TEST_DIRS = [
-    'zurich_city_13_a',
-    'zurich_city_14_c',
-    'zurich_city_15_a',
+    'zurich_city_12_a',
 ]
+
 
 
 def main(phase):
     if phase == 'train':
         dirs = TRAIN_DIRS
-        timestamp_path = "/home/xiaoshan/work/datasets/DSEC/images/train"
     elif phase == 'test':
         dirs = TEST_DIRS
-        timestamp_path = "/home/xiaoshan/work/datasets/DSEC/images/test"
 
     for dir in dirs:
-        run(dir, timestamp_path, phase)
+        run(dir, phase)
 
-
-def run(dpath_in, timestamp_path, phase):
+def run(dpath_in, phase):
     print(dpath_in, phase)
-    list_fpath_image = get_list(f'{phase}_img/{dpath_in}_images/', ext='png')
+    list_fpath_image = get_list(f'night_{phase}_lbl/{dpath_in}_labels/', ext='png')
     length = max([ len(fpath) for fpath in list_fpath_image ])
     dtype_str = f'<U{length}'
+    # 只要其中以_gtFine_labelTrainIds11.png 结尾的文件
+    list_fpath_image = [fpath for fpath in list_fpath_image if fpath[-6:] == '11.png']
     list_fpath_image = np.array(list_fpath_image, dtype=np.dtype(dtype_str))
 
-    fpath_evt = f'{phase}_evt/{dpath_in}_events.h5'
-    fpath_time = f'{timestamp_path}/{dpath_in}/images/timestamps.txt'
+    fpath_evt = f'night_{phase}_evt/{dpath_in}_events.h5'
+    if phase == 'train':
+        fpath_time = f'/home/xiaoshan/work/adap_v/my_proj/data/DSEC/night/timestamps/train/{dpath_in}/{dpath_in}_semantic_timestamps.txt'
+    else:
+        fpath_time = f'/home/xiaoshan/work/adap_v/my_proj/data/DSEC/night/timestamps/val/{dpath_in}/{dpath_in}_semantic_timestamps.txt'
+    # fpath_time = f'/home/xiaoshan/work/datasets/DSEC/semantic_segmentation/{phase}/{dpath_in}/{dpath_in}_semantic_timestamps.txt'
     times = get_times(fpath_time, fpath_evt)
 
     assert len(list_fpath_image) == len(times)
 
-    DTYPE = np.dtype({'names':['t','image'], 'formats':['<i8',dtype_str], 'offsets':[0,8], 'itemsize':8 + length*4})
+    DTYPE = np.dtype({'names':['t','label'], 'formats':['<i8',dtype_str], 'offsets':[0,8], 'itemsize':8 + length*4})
     output = np.zeros((len(times),), dtype=DTYPE) 
     output['t'] = times
-    output['image'] = list_fpath_image
+    output['label'] = list_fpath_image
 
-    fpath_out = f'{phase}_img/{dpath_in}_image_info.npy'
+    fpath_out = f'night_{phase}_lbl/{dpath_in}_label_info.npy'
     np.save(fpath_out, output)
 
     print(times[0], list_fpath_image[0])
@@ -109,7 +111,7 @@ def get_times(fpath_time, fpath_evt):
 
 
 if __name__ == '__main__':
-    main('train')
+    # main('train')
     main('test')
 
 

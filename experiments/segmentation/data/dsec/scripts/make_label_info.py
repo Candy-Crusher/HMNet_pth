@@ -72,7 +72,7 @@ def run(dpath_in, phase):
     list_fpath_image = np.array(list_fpath_image, dtype=np.dtype(dtype_str))
 
     fpath_evt = f'{phase}_evt/{dpath_in}_events.h5'
-    fpath_time = f'./source/{phase}/{dpath_in}/{dpath_in}_semantic_timestamps.txt'
+    fpath_time = f'/home/xiaoshan/work/datasets/DSEC/semantic_segmentation/{phase}/{dpath_in}/{dpath_in}_semantic_timestamps.txt'
     times = get_times(fpath_time, fpath_evt)
 
     assert len(list_fpath_image) == len(times)
